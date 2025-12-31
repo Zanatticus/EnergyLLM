@@ -1,0 +1,390 @@
+Starting GRPO Overhead Measurement
+============================================================
+Log file: grpo_overhead_log_20251202_224709.txt
+
+Configuration:
+  CSV files for pre-training (2 files):
+    1. grid_search_results_20251128_075945.csv
+    2. fan_off_grid_search_results_20251129_092010.csv
+  Pre-training epochs: 0
+  Grid search samples: 3500
+  Online evaluations: 5
+  (Episodes and steps will be calculated automatically)
+  GRPO group size: 4
+  Total GRPO action samples: 20
+  Constraints: SLO=15.0s, MaxTemp=100.0°C, MaxPower=60.0W
+  Random seed: 42
+
+
+============================================================
+MEASURING GRPO OVERHEAD (PRE-TRAINING + ONLINE TRAINING)
+============================================================
+Phase 1: Pre-training from 2 CSV files: ['grid_search_results_20251128_075945.csv', 'fan_off_grid_search_results_20251129_092010.csv'] (0 epochs)
+Phase 2: Online training with RealJetsonEnv
+Online evaluations: 5 planned (1 episodes × 5 steps)
+  (Requested: 5 evaluations)
+Group size: 4 (samples per state)
+Convergence: loss change < 0.0001 for 30 consecutive updates
+Confidence exit: action prob > 0.8 for 30 consecutive steps
+Reward exit: avg reward >= 96% of dataset max for 15 consecutive episodes
+Constraints: SLO=15.0s, MaxTemp=100.0°C, MaxPower=60.0W
+Baseline power (Grid Search): 28.00 W
+
+============================================================
+PHASE 1: PRE-TRAINING GRPO FROM OFFLINE DATA
+============================================================
+Max power constraint: 60.0W
+Loaded 3872 rows from grid_search_results_20251128_075945.csv
+Loaded 594 rows from fan_off_grid_search_results_20251129_092010.csv
+Combined total: 4466 rows from 2 CSV files
+Loaded 81 rows from power_data.csv for avg_power lookup
+Created power lookup with 51 entries
+Action space: 11 x 11 x 32 (batch sizes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]) = 3872 actions
+
+Average power statistics:
+  Min avg_power: 19.99W
+  Max avg_power: 46.31W
+  Mean avg_power: 27.07W
+  Std avg_power: 3.87W
+  Max power constraint: 60.0W
+  Power violations: 0/4466 (0.0%)
+Collected 4466 raw data points
+Normalization ranges:
+  Throughput: [7.7079, 920.9601]
+  EDP efficiency: [0.000118, 0.002151]
+  Energy: [108.524688, 432.197717]
+-0.1474881522859686 1.0
+Processed 4466 normalized data points
+Reward stats - Mean: 0.5663, Std: 0.1969
+
+Reward weighting: Unified reward function with adaptive H_eff
+  R = H_eff * T_n + (1 - H_eff) * EDP_n - penalties
+  H_eff = w_T * H_T + w_P * H_P (combines temperature and power headroom)
+
+State dimension: 4
+Action dimension: 3872
+[GRPOPolicy] Using single output head (default)
+  Parameters: 131,104
+  Feature extractor: 3,328, Output head: 127,776
+
+Dataset headroom analysis (all samples, including violations):
+  Low headroom (fan_off CSV, high temperature): 594 total samples
+  High headroom (grid_search CSV, normal temperature): 3872 total samples
+  Low headroom samples by source file:
+    fan_off_grid_search_results_20251129_092010.csv: 594 samples
+  Low headroom batch sizes: min=1, max=32, avg=10.78
+  High headroom samples by source file:
+    grid_search_results_20251128_075945.csv: 3872 samples
+  High headroom batch sizes: min=1, max=32, avg=16.50
+
+DEBUG: Valid low headroom (≤0.33) samples batch size distribution:
+  Count: 587
+  Min: 1, Max: 32, Avg: 10.80
+  Top 5 batch sizes: [(32, 66), (1, 66), (26, 65), (16, 65), (8, 65)]
+
+DEBUG: Valid high headroom (>0.33) samples batch size distribution:
+  Count: 3872
+  Min: 1, Max: 32, Avg: 16.50
+  Top 5 batch sizes: [(1, 121), (2, 121), (3, 121), (4, 121), (5, 121)]
+
+Target probability distribution - LOW headroom (fan_off CSV, high temperature) [top 10 actions]:
+  NOTE: Optimal actions when temperature headroom is low (need to reduce batch size)
+        Used for training states with low headroom (from fan_off CSV)
+  1. Action 2208: prefill=6, decode=3, batch=1, prob=0.1666, mean_reward=1.0000 (1 valid samples)
+  2. Action 1536: prefill=4, decode=4, batch=1, prob=0.1229, mean_reward=0.9988 (1 valid samples)
+  3. Action 2240: prefill=6, decode=4, batch=1, prob=0.1038, mean_reward=0.9981 (1 valid samples)
+  4. Action 1504: prefill=4, decode=3, batch=1, prob=0.0939, mean_reward=0.9977 (1 valid samples)
+  5. Action 1568: prefill=4, decode=5, batch=1, prob=0.0922, mean_reward=0.9976 (1 valid samples)
+  6. Action 2272: prefill=6, decode=5, batch=1, prob=0.0428, mean_reward=0.9945 (1 valid samples)
+  7. Action 2176: prefill=6, decode=2, batch=1, prob=0.0399, mean_reward=0.9943 (1 valid samples)
+  8. Action 1505: prefill=4, decode=3, batch=2, prob=0.0312, mean_reward=0.9933 (1 valid samples)
+  9. Action 1569: prefill=4, decode=5, batch=2, prob=0.0182, mean_reward=0.9911 (1 valid samples)
+  10. Action 3616: prefill=10, decode=3, batch=1, prob=0.0162, mean_reward=0.9907 (1 valid samples)
+
+Target probability distribution - HIGH headroom (grid_search CSV, normal temperature) [top 10 actions]:
+  NOTE: Optimal actions when temperature headroom is high (can use larger batches)
+        Used for training states with high headroom (from grid_search CSV)
+  1. Action 2687: prefill=7, decode=6, batch=32, prob=0.9859, mean_reward=0.8293 (1 valid samples)
+  2. Action 3743: prefill=10, decode=6, batch=32, prob=0.0103, mean_reward=0.8219 (1 valid samples)
+  3. Action 3007: prefill=8, decode=5, batch=32, prob=0.0023, mean_reward=0.8195 (1 valid samples)
+  4. Action 3039: prefill=8, decode=6, batch=32, prob=0.0004, mean_reward=0.8164 (1 valid samples)
+  5. Action 1279: prefill=3, decode=6, batch=32, prob=0.0004, mean_reward=0.8164 (1 valid samples)
+  6. Action 2303: prefill=6, decode=5, batch=32, prob=0.0002, mean_reward=0.8157 (1 valid samples)
+  7. Action 3742: prefill=10, decode=6, batch=31, prob=0.0002, mean_reward=0.8155 (1 valid samples)
+  8. Action 1599: prefill=4, decode=5, batch=32, prob=0.0001, mean_reward=0.8143 (1 valid samples)
+  9. Action 1631: prefill=4, decode=6, batch=32, prob=0.0001, mean_reward=0.8142 (1 valid samples)
+  10. Action 2655: prefill=7, decode=5, batch=32, prob=0.0000, mean_reward=0.8128 (1 valid samples)
+
+Training will use CONDITIONAL target distributions:
+  - Low headroom states (from fan_off CSV, high temperature) → use low headroom target distribution
+  - High headroom states (from grid_search CSV, normal temperature) → use high headroom target distribution
+  This ensures the policy learns different behaviors for different headroom conditions
+
+Starting GRPO pre-training for 0 epochs...
+
+Evaluating pre-trained GRPO policy...
+
+1. Evaluation on test states:
+   Testing conditional behavior: low headroom (≤0.33) should prefer batch=1, high headroom (>0.33) should prefer larger batches
+   Using prefill_norm=0.5, decode_norm=0.5 (middle frequencies) to isolate temperature headroom effect
+
+State: prefill_norm=0.50, decode_norm=0.50, batch_norm=0.50, temp_headroom=0.10
+  Top 5 actions:
+    prefill_freq=7, decode_freq=9, batch=1, prob=0.0003
+    prefill_freq=4, decode_freq=0, batch=10, prob=0.0003
+    prefill_freq=2, decode_freq=1, batch=14, prob=0.0003
+    prefill_freq=1, decode_freq=5, batch=24, prob=0.0003
+    prefill_freq=3, decode_freq=4, batch=14, prob=0.0003
+
+State: prefill_norm=0.50, decode_norm=0.50, batch_norm=0.50, temp_headroom=0.20
+  Top 5 actions:
+    prefill_freq=7, decode_freq=9, batch=1, prob=0.0003
+    prefill_freq=4, decode_freq=0, batch=10, prob=0.0003
+    prefill_freq=2, decode_freq=1, batch=14, prob=0.0003
+    prefill_freq=1, decode_freq=5, batch=24, prob=0.0003
+    prefill_freq=3, decode_freq=4, batch=14, prob=0.0003
+
+State: prefill_norm=0.50, decode_norm=0.50, batch_norm=0.50, temp_headroom=0.30
+  Top 5 actions:
+    prefill_freq=7, decode_freq=9, batch=1, prob=0.0003
+    prefill_freq=4, decode_freq=0, batch=10, prob=0.0003
+    prefill_freq=2, decode_freq=1, batch=14, prob=0.0003
+    prefill_freq=1, decode_freq=5, batch=24, prob=0.0003
+    prefill_freq=3, decode_freq=4, batch=14, prob=0.0003
+
+State: prefill_norm=0.50, decode_norm=0.50, batch_norm=0.50, temp_headroom=0.33
+  Top 5 actions:
+    prefill_freq=7, decode_freq=9, batch=1, prob=0.0003
+    prefill_freq=4, decode_freq=0, batch=10, prob=0.0003
+    prefill_freq=2, decode_freq=1, batch=14, prob=0.0003
+    prefill_freq=1, decode_freq=5, batch=24, prob=0.0003
+    prefill_freq=3, decode_freq=4, batch=14, prob=0.0003
+
+State: prefill_norm=0.50, decode_norm=0.50, batch_norm=0.50, temp_headroom=0.50
+  Top 5 actions:
+    prefill_freq=7, decode_freq=9, batch=1, prob=0.0003
+    prefill_freq=4, decode_freq=0, batch=10, prob=0.0003
+    prefill_freq=1, decode_freq=5, batch=24, prob=0.0003
+    prefill_freq=2, decode_freq=1, batch=14, prob=0.0003
+    prefill_freq=9, decode_freq=3, batch=14, prob=0.0003
+
+State: prefill_norm=0.50, decode_norm=0.50, batch_norm=0.50, temp_headroom=0.70
+  Top 5 actions:
+    prefill_freq=7, decode_freq=9, batch=1, prob=0.0003
+    prefill_freq=4, decode_freq=0, batch=10, prob=0.0003
+    prefill_freq=1, decode_freq=5, batch=24, prob=0.0003
+    prefill_freq=2, decode_freq=1, batch=14, prob=0.0003
+    prefill_freq=9, decode_freq=3, batch=14, prob=0.0003
+
+State: prefill_norm=0.50, decode_norm=0.50, batch_norm=0.50, temp_headroom=0.90
+  Top 5 actions:
+    prefill_freq=7, decode_freq=9, batch=1, prob=0.0003
+    prefill_freq=4, decode_freq=0, batch=10, prob=0.0003
+    prefill_freq=1, decode_freq=5, batch=24, prob=0.0003
+    prefill_freq=2, decode_freq=1, batch=14, prob=0.0003
+    prefill_freq=9, decode_freq=3, batch=14, prob=0.0003
+
+2. Comparison with conditional target distributions:
+
+Comparing policy probabilities to target distribution:
+  (Evaluating on states from dataset that correspond to top target actions)
+
+  LOW headroom condition (≤0.33):
+    Action 2208: prefill=6, decode=3, batch=1
+      Target prob: 0.1666, Policy prob: 0.0002, KL: 5.1281
+    Action 1536: prefill=4, decode=4, batch=1
+      Target prob: 0.1229, Policy prob: 0.0002, KL: 5.1284
+    Action 2240: prefill=6, decode=4, batch=1
+      Target prob: 0.1038, Policy prob: 0.0003, KL: 5.1283
+    Action 1504: prefill=4, decode=3, batch=1
+      Target prob: 0.0939, Policy prob: 0.0003, KL: 5.1282
+    Action 1568: prefill=4, decode=5, batch=1
+      Target prob: 0.0922, Policy prob: 0.0003, KL: 5.1286
+
+  HIGH headroom condition (>0.33):
+    Action 2687: prefill=7, decode=6, batch=32
+      Target prob: 0.9859, Policy prob: 0.0002, KL: 8.2381
+    Action 3743: prefill=10, decode=6, batch=32
+      Target prob: 0.0103, Policy prob: 0.0003, KL: 8.2374
+    Action 3007: prefill=8, decode=5, batch=32
+      Target prob: 0.0023, Policy prob: 0.0002, KL: 8.2377
+    Action 3039: prefill=8, decode=6, batch=32
+      Target prob: 0.0004, Policy prob: 0.0002, KL: 8.2379
+    Action 1279: prefill=3, decode=6, batch=32
+      Target prob: 0.0004, Policy prob: 0.0002, KL: 8.2378
+
+  Note: Using conditional target distributions - see per-condition evaluations above
+Pre-training completed in 9.29 sec
+
+============================================================
+PHASE 2: ONLINE DEVELOPMENT OF GRPO AGENT
+============================================================
+
+[RealJetsonEnv] Loading Llama model: meta-llama/Llama-3.2-1B-Instruct
+Using device: cuda
+[RealJetsonEnv] Model loaded successfully!
+Real Jetson environment initialized with 3872 actions
+  Action space: 11 x 11 x 32 (batch sizes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32])
+
+Loaded normalization ranges from dataset:
+  Throughput: [7.71, 920.96] tokens/sec
+  EDP efficiency: [0.000118, 0.002151]
+
+Dataset reward statistics:
+  Maximum reward in dataset: 1.0000
+  Average reward in dataset: 0.5663
+  (Your online rewards should be compared to these values)
+[GRPOPolicy] Using single output head (default)
+  Parameters: 131,104
+  Feature extractor: 3,328, Output head: 127,776
+Using pre-trained policy for GRPO agent
+
+Reward-based exit condition:
+  Dataset maximum reward: 1.0000
+  Target reward (96% of max): 0.9600
+  Will exit when average reward >= 0.9600 for 15 consecutive episodes
+Models will be saved to: grpo_models_20251202_224725/
+Writing GRPO training results to: grpo_training_results_20251202_224725.csv
+Current frequency: 1300MHz
+
+=== Prefill Phase ===
+Effective batch size: 10
+Tokenize time: 0.0468 sec
+Prefill compute time: 2.5941 sec
+Total prefill time: 2.6361 sec
+Input Tokens: 140
+**Prefill Throughput: 53.11 tokens/sec**
+Power: {'GPU': 9.174367924528301, 'CPU': 10.892433962264152, 'MEM': 1.948051886792453, 'I/O_POWER': 6.3942971698113205, 'TOTAL_POWER': 28.409150943396227, 'CPU_TEMP': 58.385495283018976, 'GPU_TEMP': 51.535141509434, 'TJ_TEMP': 58.390363207547274}
+Current frequency: 510MHz
+
+=== Decode Phase ===
+Time: 13.5631 sec
+Generated Tokens: 1000 (effective_batch_size=10)
+**Decode Throughput: 73.73 tokens/sec**
+**Decode Latency: 135.63 ms/token**
+Power: {'GPU': 8.773778378378378, 'CPU': 10.454857657657659, 'MEM': 2.908745945945946, 'I/O_POWER': 7.8457387387387385, 'TOTAL_POWER': 29.98312072072072, 'CPU_TEMP': 58.57607657657697, 'GPU_TEMP': 51.67425135135168, 'TJ_TEMP': 58.575115315315706}
+
+[DEBUG] RealJetsonEnv: Running ACTUAL LLM inference
+  Action: prefill_freq=10, decode_freq=2, batch=10
+  Prefill: 2.6361s, 140 tokens, 28.41W
+  Decode: 13.5631s, 1000 tokens, 29.98W
+  E2E: 16.1992s, Total Power: 29.20W, Temp: 58.5°C
+Current frequency: 408MHz
+
+=== Prefill Phase ===
+Effective batch size: 10
+Tokenize time: 0.0092 sec
+Prefill compute time: 0.2361 sec
+Total prefill time: 0.2412 sec
+Input Tokens: 150
+**Prefill Throughput: 621.96 tokens/sec**
+Power: {'GPU': 7.295222222222223, 'CPU': 9.921611111111112, 'MEM': 2.4446111111111115, 'I/O_POWER': 7.061111111111111, 'TOTAL_POWER': 26.722555555555555, 'CPU_TEMP': 58.362444444444435, 'GPU_TEMP': 51.63149999999999, 'TJ_TEMP': 58.35199999999999}
+Current frequency: 1224MHz
+
+=== Decode Phase ===
+Time: 17.3657 sec
+Generated Tokens: 1000 (effective_batch_size=10)
+**Decode Throughput: 57.58 tokens/sec**
+**Decode Latency: 173.66 ms/token**
+Power: {'GPU': 10.587677881173944, 'CPU': 10.520852541159627, 'MEM': 2.4419069434502503, 'I/O_POWER': 7.180076592698639, 'TOTAL_POWER': 30.73051395848246, 'CPU_TEMP': 58.88985755189721, 'GPU_TEMP': 52.3847129563353, 'TJ_TEMP': 58.89213743736606}
+Current frequency: 306MHz
+
+=== Prefill Phase ===
+Effective batch size: 22
+Tokenize time: 0.0181 sec
+Prefill compute time: 0.4102 sec
+Total prefill time: 0.4204 sec
+Input Tokens: 308
+**Prefill Throughput: 732.65 tokens/sec**
+Power: {'GPU': 7.115677419354839, 'CPU': 10.960258064516129, 'MEM': 2.3302258064516126, 'I/O_POWER': 6.958161290322581, 'TOTAL_POWER': 27.364322580645158, 'CPU_TEMP': 59.472387096774185, 'GPU_TEMP': 52.095387096774175, 'TJ_TEMP': 59.46029032258063}
+Current frequency: 1300MHz
+
+=== Decode Phase ===
+Time: 15.1062 sec
+Generated Tokens: 2200 (effective_batch_size=22)
+**Decode Throughput: 145.64 tokens/sec**
+**Decode Latency: 151.06 ms/token**
+Power: {'GPU': 11.251265519820494, 'CPU': 10.80168287210172, 'MEM': 2.351350037397158, 'I/O_POWER': 7.051804038893044, 'TOTAL_POWER': 31.456102468212414, 'CPU_TEMP': 59.47967090501142, 'GPU_TEMP': 53.0226103216159, 'TJ_TEMP': 59.47941361256566}
+Current frequency: 1122MHz
+
+=== Prefill Phase ===
+Effective batch size: 5
+Tokenize time: 0.1166 sec
+Prefill compute time: 0.1713 sec
+Total prefill time: 0.2846 sec
+Input Tokens: 70
+**Prefill Throughput: 245.95 tokens/sec**
+Power: {'GPU': 5.65796, 'CPU': 9.715200000000001, 'MEM': 1.3015999999999999, 'I/O_POWER': 5.43392, 'TOTAL_POWER': 22.108680000000003, 'CPU_TEMP': 58.94591999999998, 'GPU_TEMP': 0, 'TJ_TEMP': 58.95463999999998}
+Current frequency: 1224MHz
+
+=== Decode Phase ===
+Time: 15.3109 sec
+Generated Tokens: 500 (effective_batch_size=5)
+**Decode Throughput: 32.66 tokens/sec**
+**Decode Latency: 153.11 ms/token**
+Power: {'GPU': 8.15409963768116, 'CPU': 10.443428743961352, 'MEM': 1.8127065217391305, 'I/O_POWER': 6.2559214975845405, 'TOTAL_POWER': 26.666156400966184, 'CPU_TEMP': 59.24949214975872, 'GPU_TEMP': 52.355555555555796, 'TJ_TEMP': 59.249509057971274}
+Current frequency: 1122MHz
+
+=== Prefill Phase ===
+Effective batch size: 7
+Tokenize time: 0.1213 sec
+Prefill compute time: 0.2772 sec
+Total prefill time: 0.3958 sec
+Input Tokens: 84
+**Prefill Throughput: 212.21 tokens/sec**
+Power: {'GPU': 5.49096551724138, 'CPU': 10.605793103448276, 'MEM': 1.2745862068965517, 'I/O_POWER': 5.399275862068966, 'TOTAL_POWER': 22.77062068965517, 'CPU_TEMP': 59.244172413793095, 'GPU_TEMP': 0, 'TJ_TEMP': 59.255999999999986}
+Current frequency: 1122MHz
+
+=== Decode Phase ===
+Time: 14.1327 sec
+Generated Tokens: 700 (effective_batch_size=7)
+**Decode Throughput: 49.53 tokens/sec**
+**Decode Latency: 141.33 ms/token**
+Power: {'GPU': 7.784389534883721, 'CPU': 10.444466408268735, 'MEM': 1.8565277777777778, 'I/O_POWER': 6.30106976744186, 'TOTAL_POWER': 26.386453488372094, 'CPU_TEMP': 59.253480620155344, 'GPU_TEMP': 52.29607622739065, 'TJ_TEMP': 59.25281589147315}
+GRPO training results saved to: grpo_training_results_20251202_224725.csv
+Completed all 1 episodes without reaching reward target, convergence, or high confidence
+
+GRPO Results:
+  Total time: 95.65169954299927 sec
+  Evaluations: 5
+  Avg inference time: 16.900620794296266 sec
+    - Batching time: 0.0624 sec (0.3692172066310083%)
+    - GPU compute time: 0.7377800000000001 sec (4.3654017741702775%)
+  Avg action selection: 2.3721933364868164 ms (per action in group)
+  Avg group sampling: 9.488773345947266 ms (for 4 actions)
+  Avg policy update: 2.4046010971069336 sec
+  Avg action probability: 0.00027264367672614754
+  Avg power: 27.25978 W
+  Total energy: 2304.84224987 J
+  Avg reward: 0.04322145644771857
+  Max reward: 0.11164962804214283
+  Constraint violations:
+    - SLO: 0/5 (0.0%)
+    - Temperature: 0/5 (0.0%)
+    - Power: 0/5 (0.0%)
+
+  GRPO Overhead Breakdown (Time):
+    Pure inference: 84.50310397148132 sec (88.34459228138837%)
+    Action selection: 0.011860966682434082 sec (0.01240016302805169%)
+    Policy updates: 2.4046010971069336 sec (2.5139136142855145%)
+    Total RL overhead: 2.4164620637893677 sec (2.5263137773135655%)
+    Overhead per eval: 483.29241275787354 ms
+
+  GRPO Energy Breakdown:
+    Pure inference energy: 2304.84224987 J (97.54790863270694%)
+    Action selection energy: 1.1646123335512957 J (0.04928992320936198%)
+    Policy updates energy: 56.77290640053684 J (2.402801444083713%)
+    Total RL overhead energy: 57.93751873408814 J (2.4520913672930753%)
+    Total calculated energy: 2362.779768604088 J
+    Measured energy (from env): 2304.84224987 J
+    Difference: 57.94 J (2.45%)
+
+  Average Power (Energy / Time):
+    Avg inference power: 27.275237731478526 W
+    Avg action selection power: 98.1886523023515 W
+    Avg policy update power: 23.610114155251143 W
+
+  Power Comparison vs Baseline:
+    Baseline power: 28.0 W
+    GRPO power: 27.25978 W
+    Power increase: -0.7402200000000008 W (-2.64364285714286%)
